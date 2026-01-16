@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeDrive</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="storage-bar">
+            <span class="logo">HomeDrive</span>
+            <span class="storage-label">Storage:</span>
+            <div class="storage-visual">
+                <div class="storage-fill" id="storage-fill"></div>
+            </div>
+            <span class="storage-text" id="storage-text">Loading...</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-small">Logout</a>
+        </div>
+        
+        <div class="toolbar">
+            <div class="path">
+                <a href="#" onclick="navigateTo(''); return false;">Home</a>
+                <span id="breadcrumb-path"></span>
+            </div>
+            <div class="actions">
+                <button onclick="document.getElementById('file-upload').click()" class="btn">Upload</button>
+                <button onclick="showNewFolderModal()" class="btn">New Folder</button>
+                <button onclick="showDuplicates()" class="btn">Find Duplicates</button>
+                <button onclick="autoSort()" class="btn">Auto-Sort</button>
+                <span class="separator"></span>
+                <button onclick="showRebootModal()" class="btn">Reboot</button>
+                <button onclick="showUpdateModal()" class="btn">Update</button>
+            </div>
+        </div>
+
+        <input type="file" id="file-upload" multiple style="display: none;" onchange="uploadFiles(this.files)">
+
+        <div class="file-grid" id="file-list">
+            <!-- Files will be loaded here -->
+        </div>
+
+        <!-- Context Menu -->
+        <div id="contextMenu" class="file-context-menu">
+            <div class="context-menu-item" onclick="openFile()">Open</div>
+            <div class="context-menu-item" onclick="downloadFile(contextMenuPath)">Download</div>
+            <div class="context-menu-item" onclick="showRenameModalFromContext()">Rename</div>
+            <div class="context-menu-item" onclick="showMoveModalFromContext()">Move</div>
+            <div class="context-menu-item danger" onclick="deleteItemFromContext()">Delete</div>
+        </div>
+
+        <!-- File Viewer -->
+        <div id="fileViewer" class="file-viewer">
+            <div class="viewer-header">
+                <span class="viewer-title" id="viewerTitle"></span>
+                <button onclick="closeViewer()" class="btn">Close</button>
+            </div>
+            <div class="viewer-content" id="viewerContent">
+                <!-- File content will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- New Folder Modal -->
+    <div id="newFolderModal" class="modal">
+        <div class="modal-content">
+            <h3>Create Folder</h3>
+            <input type="text" id="newFolderName" placeholder="Folder name" class="input">
+            <div class="modal-buttons">
+                <button onclick="createFolder()" class="btn">Create</button>
+                <button onclick="closeModal('newFolderModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="renameModal" class="modal">
+        <div class="modal-content">
+            <h3>Rename</h3>
+            <input type="text" id="renameInput" class="input">
+            <div class="modal-buttons">
+                <button onclick="performRename()" class="btn">Rename</button>
+                <button onclick="closeModal('renameModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Modal -->
+    <div id="moveModal" class="modal">
+        <div class="modal-content">
+            <h3>Move To</h3>
+            <div id="folderTree" class="folder-list"></div>
+            <div class="modal-buttons">
+                <button onclick="performMove()" class="btn">Move</button>
+                <button onclick="closeModal('moveModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Duplicates Modal -->
+    <div id="duplicatesModal" class="modal">
+        <div class="modal-content large">
+            <h3>Duplicate Files</h3>
+            <div id="duplicatesList"></div>
+            <div class="modal-buttons">
+                <button onclick="deleteSelectedDuplicates()" class="btn danger">Delete Selected</button>
+                <button onclick="closeModal('duplicatesModal')" class="btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Command Modal -->
+    <div id="systemCommandModal" class="modal">
+        <div class="modal-content">
+            <h3 id="systemCommandTitle">System Command</h3>
+            <p id="systemCommandMessage">Enter sudo password:</p>
+            <input type="password" id="sudoPassword" class="input" placeholder="Password">
+            <div class="modal-buttons">
+                <button onclick="executeSystemCommand()" class="btn" id="systemCommandBtn">Execute</button>
+                <button onclick="closeModal('systemCommandModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id="progressModal" class="modal">
+        <div class="modal-content">
+            <h3 id="progressTitle">Processing...</h3>
+            <div class="progress-info">
+                <div class="progress-percent" id="progressPercent">0%</div>
+                <div class="progress-details" id="progressDetails"></div>
+                <div class="progress-speed" id="progressSpeed"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

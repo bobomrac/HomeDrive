@@ -1,0 +1,4 @@
+Flask>=3.0.0
+Werkzeug>=3.0.0
+argon2-cffi>=23.1.0
+Pillow>=10.0.0

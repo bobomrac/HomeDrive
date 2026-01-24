@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>HomeDrive</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="storage-bar">
+            <span class="logo">HomeDrive</span>
+            <span class="storage-label">Storage:</span>
+            <div class="storage-visual">
+                <div class="storage-fill" id="storage-fill"></div>
+            </div>
+            <span class="storage-text" id="storage-text">Loading...</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-small">Logout</a>
+        </div>
+        
+        <div class="toolbar">
+            <div class="path">
+                <a href="#" onclick="navigateTo(''); return false;">Home</a>
+                <span id="breadcrumb-path"></span>
+            </div>
+            <div class="actions">
+                <div style="position: relative; display: inline-block;">
+                    <button onclick="toggleUploadDropdown(event)" class="btn">Upload ▼</button>
+                    <div id="upload-dropdown" class="upload-dropdown" style="display: none;">
+                        <div class="dropdown-item" onclick="triggerFileUpload()">
+                            <span>📄 Upload Files</span>
+                        </div>
+                        <div class="dropdown-item" onclick="triggerFolderUpload()">
+                            <span>📁 Upload Folder</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="showNewFolderModal()" class="btn">New Folder</button>
+                <button onclick="showDuplicates()" class="btn">Find Duplicates</button>
+                <button onclick="autoSort()" class="btn">Auto-Sort</button>
+                <button onclick="emptyTrash()" class="btn">🗑️ Empty Trash</button>
+                <span class="separator"></span>
+                <button onclick="showRebootConfirm()" class="btn">Reboot</button>
+                <button onclick="showUpdateConfirm()" class="btn">Update</button>
+                <button onclick="showShutdownConfirm()" class="btn">Shutdown</button>
+                <span class="separator"></span>
+                <button onclick="showCommands()" class="btn">⚙️ Commands</button>
+                <button onclick="showChangePasswordModal()" class="btn">🔒 Password</button>
+            </div>
+        </div>
+
+        <input type="file" id="file-upload" multiple style="display: none;" onchange="uploadFiles(this.files)">
+        <input type="file" id="folder-upload" webkitdirectory directory style="display: none;" onchange="uploadFolder(this.files)">
+
+        <div id="favorites-section" class="favorites-section" style="display: none;">
+            <div class="favorites-header">
+                ★ Favorites
+            </div>
+            <div id="favorites-list" class="favorites-list"></div>
+        </div>
+
+        <div class="file-grid" id="file-list">
+            <!-- Files will be loaded here -->
+        </div>
+
+        <!-- Context Menu -->
+        <div id="contextMenu" class="file-context-menu">
+            <div class="context-menu-item" onclick="openFile()">Open</div>
+            <div class="context-menu-item" onclick="downloadFile(contextMenuPath)">Download</div>
+            <div class="context-menu-item" onclick="showRenameModalFromContext()">Rename</div>
+            <div class="context-menu-item" onclick="showMoveModalFromContext()">Move</div>
+            <div class="context-menu-item danger" onclick="deleteItemFromContext()">Delete</div>
+        </div>
+
+        <!-- File Viewer -->
+        <div id="fileViewer" class="file-viewer">
+            <div class="viewer-header">
+                <span class="viewer-title" id="viewerTitle"></span>
+                <button onclick="closeViewer()" class="btn">Close</button>
+            </div>
+            <div class="viewer-content" id="viewerContent">
+                <!-- File content will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- New Folder Modal -->
+    <div id="newFolderModal" class="modal">
+        <div class="modal-content">
+            <h3>Create Folder</h3>
+            <input type="text" id="newFolderName" placeholder="Folder name" class="input">
+            <div class="modal-buttons">
+                <button onclick="createFolder()" class="btn">Create</button>
+                <button onclick="closeModal('newFolderModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div id="renameModal" class="modal">
+        <div class="modal-content">
+            <h3>Rename</h3>
+            <input type="text" id="renameInput" class="input">
+            <div class="modal-buttons">
+                <button onclick="performRename()" class="btn">Rename</button>
+                <button onclick="closeModal('renameModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Move Modal -->
+    <div id="moveModal" class="modal">
+        <div class="modal-content">
+            <h3>Move To</h3>
+            <div id="folderTree" class="folder-list"></div>
+            <div class="modal-buttons">
+                <button onclick="performMove()" class="btn">Move</button>
+                <button onclick="closeModal('moveModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Duplicates Modal -->
+    <div id="duplicatesModal" class="modal">
+        <div class="modal-content large">
+            <h3>Duplicate Files</h3>
+            <div id="duplicatesList"></div>
+            <div class="modal-buttons">
+                <button onclick="deleteSelectedDuplicates()" class="btn danger">Delete Selected</button>
+                <button onclick="closeModal('duplicatesModal')" class="btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id="progressModal" class="modal">
+        <div class="modal-content">
+            <h3 id="progressTitle">Processing...</h3>
+            <div class="progress-info">
+                <div class="progress-percent" id="progressPercent">0%</div>
+                <div class="progress-details" id="progressDetails"></div>
+                <div class="progress-speed" id="progressSpeed"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Commands Modal -->
+    <div id="commandsModal" class="modal">
+        <div class="modal-content large">
+            <h3>System Commands</h3>
+            <p style="color: #999; font-size: 13px; margin-bottom: 15px;">
+                Configure commands for system operations (reboot, update, shutdown).
+            </p>
+
+            <div id="commandsList" style="max-height: 400px; overflow-y: auto;">
+                <!-- Commands will be loaded here -->
+            </div>
+
+            <div class="modal-buttons">
+                <button onclick="detectCommands()" class="btn" style="background: #444;">Auto-Detect</button>
+                <button onclick="saveCommands()" class="btn">Save All</button>
+                <button onclick="closeModal('commandsModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <h3>Change Password</h3>
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="currentPassword" class="input" placeholder="Enter current password">
+            </div>
+            <div class="form-group">
+                <label>New Password (min 8 characters)</label>
+                <input type="password" id="newPassword" class="input" placeholder="Enter new password">
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" id="confirmPassword" class="input" placeholder="Re-enter new password">
+            </div>
+            <div class="modal-buttons">
+                <button onclick="changePassword()" class="btn">Change Password</button>
+                <button onclick="closeModal('changePasswordModal')" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set CSRF token from meta tag
+        const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+        if (tokenMeta) {
+            csrfToken = tokenMeta.content;
+        }
+    </script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

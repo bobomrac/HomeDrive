@@ -1,5 +1,5 @@
 # HomeDrive
-
+!(homedrive.png)
 A self-hosted network file storage solution for home and LAN environments. HomeDrive provides a simple, secure alternative to cloud storage services like OneDrive and Google Drive without the complexity of Docker, containers, or Nextcloud.
 
 ## Vision

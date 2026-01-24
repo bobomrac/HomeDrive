@@ -1,8 +1,8 @@
 # HomeDrive
-![Screenshot](homedrive.png)
+
 
 A self-hosted network file storage solution for home and LAN environments. HomeDrive provides a simple, secure alternative to cloud storage services like OneDrive and Google Drive without the complexity of Docker, containers, or Nextcloud.
-
+![Screenshot](homedrive.png)
 ## Vision
 
 HomeDrive is designed for households and families who want control over their data without technical overhead. It runs as a single executable on any Linux machine, making personal file storage accessible to users who want simplicity and reliability.

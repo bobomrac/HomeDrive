@@ -31,19 +31,19 @@ On first run, the interactive setup wizard will guide you through:
 - Multi-file selection with drag-and-drop support
 - Favorites system for quick folder access
 - Trash system with 30-day retention
-
+<br><br>
 - Real-time disk usage monitoring
 - Duplicate file detection with optimized hash algorithm
 - Automatic file sorting by type (Images, Documents, Videos, Audio, etc.)
 - Thumbnail generation for images
-
+<br><br>
 - Password-protected access with Argon2 hashing
 - HTTPS/SSL support (self-signed or Let's Encrypt)
 - CSRF protection on all operations
 - Rate limiting on login attempts
 - Session management with automatic timeout
 - Path traversal validation
-
+<br><br>
 - Single executable deployment
 - Systemd service support for auto-start
 - Polkit integration for passwordless system operations
